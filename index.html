@@ -1,67 +1,214 @@
 <!DOCTYPE html>
-<html lang="es" data-bs-theme="dark">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crypto Dashboard</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/styles.css" />
+
+  <style>
+    body {
+      background-color: #0f111a;
+      color: #ffffff;
+    }
+
+    .card {
+      background-color: #1b1e2a;
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    }
+
+    .card h6 {
+      color: #ffffff;
+    }
+
+    .card p, small {
+      color: #9ca3af;
+    }
+
     
+    #totalExchanges,
+    #meanPrice,
+    #topCoin {
+      color: #ffffff !important;
+      font-weight: 600;
+    }
+
+    #reloadData {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+    }
+
+    #reloadData:hover {
+      background-color: #334155;
+    }
+
+    .chart-body {
+      width: 100%;
+      max-height: 300px;
+      min-height: 220px;
+      padding: 6px 4px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chart-body canvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+    }
+
+    .table thead {
+      background-color: #1e2233;
+      color: #9ca3af;
+    }
+
+    .table tbody tr:hover {
+      background-color: #242a3b;
+    }
+
+    input.form-control {
+      background-color: #111320 !important;
+      border: 1px solid #2c3246 !important;
+      color: #fff !important;
+    }
+
+    input.form-control::placeholder {
+      color: #6b7280;
+    }
+
+    footer a {
+      text-decoration: none;
+    }
+
+    /* Fecha a la derecha */
+    #exchangeUpdateTime {
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+  </style>
 </head>
+
 <body>
-    <!-- NAV -->
-    <nav class="navbar navbar-expand-lg sticky-top">
-        <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="#">
-            <span style="color:var(--accent)">●</span> Crypto Dashboard
-            <small class="ms-2 text-secondary">Coinlore</small>
-        </a>
-        <div class="d-flex gap-2">
-            <button id="btnReload" class="btn btn-sm btn-outline-secondary btn-refresh">
-            Recargar datos
-            </button>
-        </div>
-        </div>
-    </nav>
+  <div class="container-fluid p-4">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 class="fw-bold">
+        <span class="text-success">●</span> Crypto Dashboard
+        <small class="text-secondary">Coinlore</small>
+      </h4>
+      <div>
+        <button id="reloadData" class="btn btn-sm">Recargar datos</button>
+      </div>
+    </div>
 
-    <main class="container my-4">
-        <!-- Charts -->
-        <div class="row g-3 mt-1">
-            <div class="col-12 col-lg-6">
-                <div class="card p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0">Top 10 Coins</h6>
-                        <div class="d-flex align-items-center gap-2">
-                        <small id="lastUpdatedCoin" class="muted">—</small>
-                        <div id="spinCoin" class="spinner-border text-secondary spinner d-none" role="status"></div>
-                        </div>
-                    </div>
-                    <div class="chart-container mt-3">
-                        <canvas id="chartCoin"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-lg-6">
-                <div class="card p-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0">Top 10 Exchanges por Volumen (USD)</h6>
-                    <div class="d-flex align-items-center gap-2">
-                    <small id="lastUpdatedExchanges" class="muted">—</small>
-                    <div id="spinExchanges" class="spinner-border text-secondary spinner d-none" role="status"></div>
-                    </div>
-                </div>
-                <div class="chart-container mt-3">
-                    <canvas id="chartExchanges"></canvas>
-                </div>
-                </div>
-            </div>
-          
+    <!-- Indicadores -->
+    <div class="row text-center mb-4 gx-3">
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h4 id="totalExchanges">0</h4>
+          <p class="mb-0 text-uppercase small">Exchanges (total)</p>
         </div>
-    </main>
+      </div>
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h4 id="meanPrice">$0</h4>
+          <p class="mb-0 text-uppercase small">Mean price</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h4 id="topCoin">-</h4>
+          <p class="mb-0 text-uppercase small">Top Coin</p>
+        </div>
+      </div>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Gráficas -->
+    <div class="row mb-4 gx-3">
+      <div class="col-md-6">
+        <div class="card p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="fw-bold mb-0">Top 10 (USD)</h6>
+          </div>
+          <div class="chart-body">
+            <canvas id="chartCoins"></canvas>
+          </div>
+        </div>
+      </div>
 
-    <script src="/js/script.js"></script>
+      <div class="col-md-6">
+        <div class="card p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="fw-bold mb-0">Top 10 Exchanges por Volumen (USD)</h6>
+            <small id="exchangeUpdateTime">18/10/2025, 9:16:01 p.m.</small>
+          </div>
+          <div class="chart-body">
+            <canvas id="chartExchanges"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tablas -->
+    <div class="row gx-3">
+      <div class="col-md-6 mb-4">
+        <div class="card p-3">
+          <h6 class="fw-bold mb-2">Coins</h6>
+          <input id="searchCoin" type="text" class="form-control form-control-sm mb-2" placeholder="Buscar coin...">
+          <div class="table-responsive" style="max-height:580px; overflow:auto;">
+            <table class="table table-dark table-striped table-sm align-middle mb-0">
+              <thead>
+                <tr>
+                  <th style="width:6%">#</th>
+                  <th style="width:46%">Coin</th>
+                  <th style="width:18%">Key</th>
+                  <th style="width:30%">Precio (USD)</th>
+                </tr>
+              </thead>
+              <tbody id="tableCoins"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 mb-4">
+        <div class="card p-3">
+          <h6 class="fw-bold mb-2">Exchanges</h6>
+          <input id="searchExchange" type="text" class="form-control form-control-sm mb-2" placeholder="Buscar exchange...">
+          <div class="table-responsive" style="max-height:580px; overflow:auto;">
+            <table class="table table-dark table-striped table-sm align-middle mb-0">
+              <thead>
+                <tr>
+                  <th style="width:6%">#</th>
+                  <th style="width:54%">Exchange</th>
+                  <th style="width:20%">Par</th>
+                  <th style="width:20%">Volumen (USD)</th>
+                </tr>
+              </thead>
+              <tbody id="tableExchanges"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="text-secondary text-end small mt-3">
+      Datos de <a href="https://www.coinlore.com/cryptocurrency-data-api" class="text-info" target="_blank">Coinlore API</a>
+    </footer>
+  </div>
+
+ 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="./js/script.js"></script>
 </body>
 </html>
